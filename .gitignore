@@ -11,3 +11,16 @@ __pycache__
 tests/__pycache__
 light_aligner/__pycache__
 .gitignore
+*.egg-info
+*.pyc
+# https://github.com/github/gitignore/blob/master/Python.gitignore
+dist/
+build/
+sdist/
+*.manifest
+*.spec
+htmlcov/
+.coverage.*
+.cache
+diskcache/
+.ipynb_checkpoints
