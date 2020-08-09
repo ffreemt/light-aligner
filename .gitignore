@@ -1,0 +1,10 @@
+00memo-light-aligner.txt
+start-venv.bat
+libs-needed.txt
+pip-list.txt
+l.py
+.venv
+needed-libs.txt
+quality-indicator.py
+*/__pycache__
+

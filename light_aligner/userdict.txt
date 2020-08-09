@@ -1,0 +1,5 @@
+i: 我
+I: 我
+you: 你
+Trump: 川普
+xxx:

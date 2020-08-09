@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "light-aligner"
+version = "0.1.0"
+description = "a light-weight aligner."
+authors = ["ffreemt"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+logzero = "^1.5.0"
+langid = "^1.1.6"
+textblob = "^0.15.3"
+ujson = "^3.1.0"
+msgpack = "^1.0.0"
+orjson = "^3.3.0"
+cchardet = "^2.1.6"
+chardet = "^3.0.4"
+polyglot = "^16.7.4"
+pandas = "^1.1.0"
+matplotlib = "^3.3.0"
+seaborn = "^0.10.1"
+rank_bm25 = "^0.2.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

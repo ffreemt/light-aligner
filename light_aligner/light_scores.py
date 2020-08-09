@@ -1,0 +1,308 @@
+r"""
+calculate the paras similarity score matrix for given english text and chinese text
+
+refer to playground\xxx-similarity\xxx_wu_ch3_proc.py
+"""
+
+from typing import List, Optional, Union
+
+import sys
+from pathlib import Path
+import re
+import numpy as np
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from polyglot.text import Detector
+
+from rank_bm25 import BM25Okapi
+
+from tqdm import tqdm
+from logzero import logger
+
+from .read_text import read_text
+from .bingmdx_tr import bingmdx_tr
+
+# matplotlib.use("TkAgg")
+
+
+def remove_stopwords(text: str,) -> str:
+    """ remove stopwords from chinese text. """
+    curr_dir = Path(__file__).parent
+    text_sw = read_text(Path(curr_dir) / r"stopwords\cn_stopwords.txt")
+    stopwords = [elm.strip() for elm in text_sw.splitlines() if elm.strip()]
+
+    stopwords = stopwords[11:]  # keep 0...9
+    for elm in stopwords:
+        text = text.replace(elm, "")
+    return text
+
+
+# fmt: off
+def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+        text1: Union[List[str], str],
+        text2: Union[List[str], str],
+        pairs: Optional[int] = None,
+        scale: str = "max",
+        # tol: int = 10,
+) -> np.ndarray:
+    # fmt: on
+    """
+    calculate the paras similarity score matrix for given english text and chinese text
+
+    scale: divide this scale_ per row
+                'maxoverall': scale_ = matrix max, plt.contourf: levels=10
+                'max': scale_ = row max, plt.contourf: vmin,vmax
+                'sum': scale_ = row sum, plt.contourf: levels=10
+                else: unchanged (scale_=1), plt.contourf: levels=10
+
+    pairs: attempt to collect pairs (default=half of the number of paras) of alignments
+    tol: default 10, search along the main diagnal with 2 * tol width
+    """
+
+    logger.info("scale: **%s**", scale)
+
+    if isinstance(text1, list):
+        len1 = len(text1)
+        text1 = "\n".join(elm.replace("\n", " ") for elm in text1)
+    else:
+        len1 = len(text1.splitlines())
+    if isinstance(text2, list):
+        len2 = len(text2)
+        text2 = "\n".join(elm.replace("\n", " ") for elm in text2)
+        # text2 = [eml.strip() for elm in text2.splitlines() if elm.strip()]
+    else:
+        len2 = len(text2.splitlines())
+
+    lang1 = Detector(text1).language.code
+    lang2 = Detector(text2).language.code
+
+    if lang1 not in ["en", "zh"]:
+        logger.warning(" text1 language deteced: **%s**, not English not Chinese", lang1)
+
+    if lang2 not in ["en", "zh"]:
+        logger.warning(" Text2 language deteced: **%s**, not English not Chinese", lang2)
+
+    if lang1 == lang2:
+        logger.warning(" lang1 **%s** and lang2 **%s** are the same, not sure this is what you want. ", lang1, lang2)
+
+    def text_en_to_paras(text_en):
+        text_en = re.sub(r"[^a-zA-Z\d\s—*-]+", "", text_en)
+
+        # paras_en = [elm.strip() for elm in text_en.splitlines() if elm.strip()]
+
+        # do not remove empty lines after processing
+        # to avoid line change
+        paras_en = [elm.strip() for elm in text_en.splitlines()]
+
+        return paras_en
+
+    def text_zh_to_paras(text_zh):
+        text_zh = re.sub(r"[^一-龙\w\s—*-]+", "", text_zh)
+
+        # paras_zh = [elm.strip() for elm in text_zh.splitlines() if elm.strip()]
+
+        paras_zh = [elm.strip() for elm in text_zh.splitlines()]
+        return paras_zh
+
+    # process text1
+    if lang1 in ["en"]:
+        paras_en = text_en_to_paras(text1)
+        paras_zh = text_zh_to_paras(text2)
+        len_en = len1
+        len_zh = len2
+    else:
+        paras_zh = text_zh_to_paras(text1)
+        paras_en = text_en_to_paras(text2)
+        len_en = len2
+        len_zh = len1
+
+    # make sure lines numbers are not altered
+    assert len_en == len(paras_en)
+    assert len_zh == len(paras_zh)
+
+    row = len(paras_en)
+    col = len(paras_zh)
+
+    # set default pairs
+    if pairs is None:
+        pairs = min(row // 2, col // 2)
+
+    # remove stopwords
+    # _ = remove_stopwords(text_zh)
+    corpus = [remove_stopwords(elm).strip() for elm in paras_zh]
+    assert len(corpus) == len(paras_zh)
+
+    # single char per token
+    tokenized_corpus = [[*doc] for doc in corpus]
+    bm25 = BM25Okapi(tokenized_corpus)
+
+    # gen correlation/score matrix
+    corr_mat = []
+    for sent in tqdm(paras_en):
+        # sent = "Hello there good man!"
+        # return the original if MDXDICT.get return None
+
+        # tr = w4w_to_zh(sent.lower().split())
+        sent_tr = bingmdx_tr(sent)
+
+        sent_tr = remove_stopwords(sent_tr)
+
+        # dedup: crucial
+        corr = bm25.get_scores([*set("".join(sent_tr))])
+
+        # without dedup, does not work
+        # corr = bm25.get_scores([*("".join(tr))])
+
+        corr_mat.append(corr)
+
+    # scale w.r.t next max
+    mat2 = np.asarray(corr_mat).copy()
+
+    row, col = mat2.shape
+    for idx, elm in enumerate(mat2):
+        # if idx > 0: break
+        c_row = elm.copy()
+        # row_max = c_row[c_row.argmax()]
+        c_row[c_row.argmax()] = 0
+        # if not row_max: continue
+
+        # mat2[idx] = mat2[idx] / row_max
+        if not c_row[c_row.argmax()]:
+            continue
+        mat2[idx] = mat2[idx] / abs(c_row[c_row.argmax()])  # nex max
+
+        # also divide columns: doesnt work
+        # for i in range(row): mat2[idx, i] = mat2[idx, i] / row_max
+
+    # plt.figure(22)
+    # plt.contourf(mat2, levels=40, cmap="gist_heat_r")
+
+    df2 = pd.DataFrame(mat2).copy()
+    # procesing columns the same way
+    for idx in range(col):
+        idx0 = np.asarray(df2[idx]).argmax()
+        # col_max = df2[idx][idx0]
+        df2[idx][idx0] = 0
+        idx0 = np.asarray(df2[idx]).argmax()
+        col_max_next = df2[idx][idx0]
+        # if not col_max: continue
+        for jdx in range(row):
+            if col_max_next:
+                mat2[jdx, idx] = mat2[jdx, idx] / abs(col_max_next)
+
+    scale_o = 1
+    if scale[:4].lower() in ["maxo"]:
+        scale_o = mat2.max()
+
+    # normalize rows to 1
+    # for idx in range(len(mat2)):
+    for idx, elm in enumerate(mat2):
+        scale_ = scale_o
+        if scale.lower() in ["sum"]:
+            scale_ = mat2[idx].sum()
+        elif scale.lower() in ["max"]:
+            scale_ = mat2[idx].max()
+
+        if scale_ > 0:
+            mat2[idx] = mat2[idx] / scale_
+
+    _ = """
+    mat2a = mat2.copy()
+    for idx in range(len(mat2a)):
+        mat2a[idx] = mat2a[idx] / mat2a[idx].sum()
+    plt.figure(); plt.contourf(mat2a, levels=40, cmap="gist_heat_r"); plt.colorbar()
+    # """
+
+    if 'IPython' in sys.modules:
+        # plt.figure()
+        # plt.contourf(mat2, levels=10, cmap="gist_heat_r")
+        # plt.contourf(mat2, vmin=mat2.mean(), vmax=mat2.max(), cmap="gist_heat_r")
+        # plt.contourf(mat2, cmap="gist_heat_r")
+        # plt.contourf(mat2, cmap="gist_heat_r", origin="upper")
+        # plt.colorbar()
+
+        annot = False
+        linewidths = 0
+        if max(row, col) < 30:
+            annot = True
+            linewidths = 0.001 / max(row, col)
+
+        plt.figure()
+        ax = plt.axes()
+
+        # sns.heatmap(mat2, ax=ax, cmap="gist_heat_r")
+        sns.heatmap(mat2, ax=ax, cmap="Blues", annot=annot, linewidths=linewidths)
+        # sns.heatmap(mat2, linewidth=1/100/mat2.shape[0])
+
+        ax.set_title(" similarity scores for en (y-axis) and zh (x-axis)")
+
+        plt.show()
+
+    return mat2
+
+
+def test_wu_ch3():
+    """ test wu ch3"""
+    dest = r"data"
+    path_en = Path(dest) / "wu_ch3_en.txt"
+    path_zh = Path(dest) / "wu_ch3_zh.txt"
+
+    text_en = "\n".join(elm.strip() for elm in read_text(path_en).splitlines() if elm.strip())
+    text_zh = "\n".join(elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip())
+
+    mat2 = light_scores(text_en, text_zh)
+
+    # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
+    # sns.heatmap(mat2, linewidth=0.01)
+    # plt.show()
+
+    assert mat2.mean() > 0.2
+
+
+def test_00test():
+    """ test 00test"""
+    dest = r"data"
+    path_en = Path(dest) / "0test_en.txt"
+    path_zh = Path(dest) / "0test_zh.txt"
+
+    text_en = "\n".join(elm.strip() for elm in read_text(path_en).splitlines() if elm.strip())
+    text_zh = "\n".join(elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip())
+
+    mat2 = light_scores(text_en, text_zh)
+
+    # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
+    # sns.heatmap(mat2, linewidth=0.01)
+    # plt.show()
+
+    assert mat2.mean() > 0.2
+
+_ = """
+corr_mat = np.asarray(mat2).copy()
+count = 0
+r_len, c_len = mat2.shape
+
+count += 1
+print(" count: ", count)
+r, c = divmod(np.argmax(corr_mat), c_len)
+if abs(r * c_len/r_len - c) < 10:
+    # print(paras_en[r],"\n", corpus[c])
+    print(paras_en[r],"\n", paras_zh[c])
+    print(r, c, count)
+    for idx in range(c_len):
+        corr_mat[r][idx] = 0
+    for idx in range(r_len):
+        corr_mat[idx][c] = 0
+    plt.figure(5); plt.contourf(np.asarray(corr_mat), levels=20, cmap="gist_heat_r")
+else:
+    corr_mat[r][c] = 0
+print(r, c, count)
+
+plt.figure(); plt.contourf(corr_mat, levels=40, cmap="gist_heat_r")
+"""
+
+
+if __name__ == "__main__":
+    test_wu_ch3()
