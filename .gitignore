@@ -7,4 +7,7 @@ l.py
 needed-libs.txt
 quality-indicator.py
 */__pycache__
-
+__pycache__
+tests/__pycache__
+light_aligner/__pycache__
+.gitignore
