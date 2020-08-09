@@ -2,7 +2,9 @@
 name = "light-aligner"
 version = "0.1.0"
 description = "a light-weight aligner."
+description-file="README.md"
 authors = ["ffreemt"]
+home-page="https://github.com/ffreemt/light-aligner"
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
