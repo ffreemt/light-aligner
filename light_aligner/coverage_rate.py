@@ -7,7 +7,7 @@ import numpy as np
 from logzero import logger
 
 
-def coverage_rate(mat, tolerance: float = 6) -> float:
+def coverage_rate(mat: np.ndarray, tolerance: float = 6) -> float:
     """
     calculate coverage rate for tolerance and np matrix
     """

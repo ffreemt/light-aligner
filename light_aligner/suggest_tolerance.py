@@ -3,15 +3,16 @@
 
 from typing import Optional
 
+import numpy as np
 from tqdm import trange
 from logzero import logger
 
-from coverage_rate import coverage_rate
+from .coverage_rate import coverage_rate
 
 
 # fmt: off
 def suggest_tolerance(
-        mat,
+        mat: np.ndarray,
         c_rate: float = 0.66,
         limit: Optional[int] = None,
 ) -> int:
@@ -19,6 +20,9 @@ def suggest_tolerance(
     """ suggest a sensible tolerance for a matrix and coverage-rate (default 0.66).
 
     """
+
+    mat = np.asarray(mat)
+
     try:
         _, col = mat.shape
     except Exception as exc:

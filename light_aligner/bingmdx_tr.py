@@ -3,7 +3,7 @@ BINGMDX: MDXDICT from w4w_to_en import MDXDICT
     C:\dl\Dropbox\mat-dir\pyqt\Sandbox\workpad\w4w_to_en\w4w_to_en\w4w_to_zh.py
 """
 
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from pathlib import Path
 
@@ -15,9 +15,10 @@ from textblob import TextBlob
 from logzero import logger, setup_logger
 
 from light_aligner.read_text import read_text
+from light_aligner.text2udict import text2udict
 
 # from w4w_to_en import MDX_DICT, HWD
-DIR_PATH = Path(__file__).parent
+# DIR_PATH = Path(__file__).parent
 
 # DICT_FILE = Path(DIR_PATH, 'msbing_c_e.pkl')
 # HWD_FILE = Path(DIR_PATH, 'msbing_c_e_hw.pkl')
@@ -26,10 +27,13 @@ DIR_PATH = Path(__file__).parent
 # msgpack.dump(MDX_DICT, open('light_aligner/msbing_c_e.msgpk', 'wb'))
 # msgpack.dump(HWD, open('light_aligner/msbing_c_e_hw.msgpk', 'wb'))
 
+DIR_PATH = Path(__file__).parent
 DICT_FILE = Path(DIR_PATH, "msbing_c_e.msgpk")
 HWD_FILE = Path(DIR_PATH, "msbing_c_e_hw.msgpk")
+EHWD_FILE = Path(DIR_PATH, "msbing_c_e_ehw.msgpk")
 MDX_DICT = msgpack.load(open(DICT_FILE, "rb"))
 HWD = msgpack.load(open(HWD_FILE, "rb"))  # Chinese header words in MSBING.mdx
+EHWD = msgpack.load(open(HWD_FILE, "rb"))  # English header words in MSBING.mdx
 
 # attempt to load userdict.txt if any
 try:
@@ -49,7 +53,7 @@ except Exception as exc:
         exc,
     )
     USERDICT = {}
-MDX_DICT.update(USERDICT)
+# MDX_DICT.update(USERDICT)  # separate MDX_DICT and USERDICT
 
 map_tags = dict(  # pylint: disable=invalid-name
     [  # BlobText nltk.pos_tag to bingmdx
@@ -97,7 +101,12 @@ logger = setup_logger(  # pylint: disable=invalid-name
 )
 logger.info("logger.name: %s", logger.name)
 
-def bingmdx_tr(sent: Union[List[str], str]) -> str:
+# fmt: off
+def bingmdx_tr(
+    sent: Union[List[str], str],
+    extra_dict: Optional[dict] = None,
+) -> str:
+    # fmt:on
     """ use msbing mdx "traslate" sent to chinese.
 
     TODO: user defined dict takes precedence
@@ -111,10 +120,12 @@ def bingmdx_tr(sent: Union[List[str], str]) -> str:
     '试验；检测；考试；测验'
     >>> bingmdx_tr('make')
     '做；制造；使得；赚钱'
-    >>> bingmdx_tr('you')
-    '你'
-    >>> bingmdx_tr('i')
-    '我'
+    >>> '你' in bingmdx_tr('you')
+    True
+    >>> '我' in bingmdx_tr('i')
+    True
+    >>> 'yyyy' in bingmdx_tr('xxxx', extra_dict={"xxxx": {"userdef": "yyyy"}})
+    True
     """
 
     if isinstance(sent, list):
@@ -123,6 +134,21 @@ def bingmdx_tr(sent: Union[List[str], str]) -> str:
     # need to keep names unchanged
     # blob = TextBlob(sent.lower())
     blob = TextBlob(sent)
+
+    # check the current work dir "userdict.txt"
+    if Path(Path().cwd() / "userdict.txt").exists():
+        # if properly formatted, update MDX_DICT
+        _ = read_text(Path().cwd() / "userdict.txt")
+        dict_ = text2udict(_)
+        # MDX_DICT.update(dict_)
+        USERDICT.update(dict_)
+
+    # use additonaly userdict id extra_dict is set
+    if extra_dict:
+        USERDICT.update(extra_dict)
+
+    if not blob.tags:  # for --- ***
+        return " ".join([*sent])
 
     list_zh = []
 
@@ -133,12 +159,20 @@ def bingmdx_tr(sent: Union[List[str], str]) -> str:
             list_zh.append(word)
             continue
 
+        res = USERDICT.get(word)
+        if res:
+            try:
+                list_zh.append(res.get("userdef").strip())
+            except Exception as exc:
+                logger.erro("exc: %s", exc)
+            # continue  # ignore entries in MDX_DICT
+
         # check first unaltered form of word
         res = MDX_DICT.get(word)
         if res:
             # userdict  MDX_DICT.get('i') -> {'userdef': ' 我'}
             # if isinstance(res, str):
-            if res.get("userdef"):
+            if res.get("userdef"):  # not necessary, but we leave it as it is
                 list_zh.append(res.get("userdef"))
             else:
                 # check tag

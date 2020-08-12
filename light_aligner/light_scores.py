@@ -6,6 +6,7 @@ refer to playground\xxx-similarity\xxx_wu_ch3_proc.py
 
 from typing import List, Optional, Union
 
+import os
 import sys
 from pathlib import Path
 import re
@@ -13,17 +14,24 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-import seaborn as sns
+if "IPython" in sys.modules:
+    import seaborn as sns  # will also import IPython
+
+# import tkinter as tk  # for messagebox.askyesnocancel
 
 from polyglot.text import Detector
 
 from rank_bm25 import BM25Okapi
 
 from tqdm import tqdm
+from yaspin import yaspin
 from logzero import logger
 
 from .read_text import read_text
 from .bingmdx_tr import bingmdx_tr
+from light_aligner.suggest_udict_terms import suggest_udict_terms
+from light_aligner.text2udict import text2udict
+from light_aligner.color_table_applymap import color_table_applymap
 
 # matplotlib.use("TkAgg")
 
@@ -35,8 +43,9 @@ def remove_stopwords(text: str,) -> str:
     stopwords = [elm.strip() for elm in text_sw.splitlines() if elm.strip()]
 
     stopwords = stopwords[11:]  # keep 0...9
-    for elm in stopwords:
-        text = text.replace(elm, "")
+    with yaspin():
+        for elm in stopwords:
+            text = text.replace(elm, "")
     return text
 
 
@@ -47,6 +56,8 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         pairs: Optional[int] = None,
         scale: str = "max",
         # tol: int = 10,
+        showplot: bool = True,
+        extra_dict: dict = {},  # bingmdx_tr auto userdict.txt
 ) -> np.ndarray:
     # fmt: on
     """
@@ -75,6 +86,10 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         # text2 = [eml.strip() for elm in text2.splitlines() if elm.strip()]
     else:
         len2 = len(text2.splitlines())
+
+    Path("en.txt").write_text(text1, encoding="utf-8")
+    Path("zh.txt").write_text(text2, encoding="utf-8")
+    logger.info(" en.txt zh.txt saved")
 
     lang1 = Detector(text1).language.code
     lang2 = Detector(text2).language.code
@@ -130,23 +145,32 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     if pairs is None:
         pairs = min(row // 2, col // 2)
 
+    logger.info(" Removing stopwords ...")
+
     # remove stopwords
     # _ = remove_stopwords(text_zh)
     corpus = [remove_stopwords(elm).strip() for elm in paras_zh]
     assert len(corpus) == len(paras_zh)
 
+    logger.info(" Doing some processing...")
+
     # single char per token
     tokenized_corpus = [[*doc] for doc in corpus]
     bm25 = BM25Okapi(tokenized_corpus)
 
+    logger.info(" Done with processing...")
+
+    logger.info(" Gen light_scores matrix...")
     # gen correlation/score matrix
     corr_mat = []
-    for sent in tqdm(paras_en):
+    _ = len(paras_en)
+    # for sent in tqdm(paras_en):
+    for idx, sent in enumerate(paras_en):
         # sent = "Hello there good man!"
         # return the original if MDXDICT.get return None
 
         # tr = w4w_to_zh(sent.lower().split())
-        sent_tr = bingmdx_tr(sent)
+        sent_tr = bingmdx_tr(sent, extra_dict=extra_dict)
 
         sent_tr = remove_stopwords(sent_tr)
 
@@ -157,6 +181,10 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         # corr = bm25.get_scores([*("".join(tr))])
 
         corr_mat.append(corr)
+
+        logger.debug(" %s/%s ", idx + 1, _)
+
+    logger.debug(" score matrix done ")
 
     # scale w.r.t next max
     mat2 = np.asarray(corr_mat).copy()
@@ -180,6 +208,8 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     # plt.figure(22)
     # plt.contourf(mat2, levels=40, cmap="gist_heat_r")
 
+    import pandas as pd
+
     df2 = pd.DataFrame(mat2).copy()
     # procesing columns the same way
     for idx in range(col):
@@ -194,20 +224,41 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
                 mat2[jdx, idx] = mat2[jdx, idx] / abs(col_max_next)
 
     scale_o = 1
+    scale = str(scale)
     if scale[:4].lower() in ["maxo"]:
         scale_o = mat2.max()
 
     # normalize rows to 1
     # for idx in range(len(mat2)):
-    for idx, elm in enumerate(mat2):
-        scale_ = scale_o
-        if scale.lower() in ["sum"]:
-            scale_ = mat2[idx].sum()
-        elif scale.lower() in ["max"]:
-            scale_ = mat2[idx].max()
+    # _ = """
+    # no scale
+    if str(scale) not in ["1"]:
+        for idx, elm in enumerate(mat2):
+            scale_ = scale_o
+            if scale.lower() in ["sum"]:
+                scale_ = mat2[idx].sum()
+            elif scale.lower() in ["max"]:
+                scale_ = mat2[idx].max()
 
-        if scale_ > 0:
-            mat2[idx] = mat2[idx] / scale_
+            if scale_ > 0:
+                mat2[idx] = mat2[idx] / scale_
+    # """
+
+    # damp values at r, c further away from
+    # row, col = mat2.shape
+    # r_ideal = c * col / row
+    # if abs(r - r_ideal) < 3:
+    # mat2[r, c] = mat2[r, c]
+    # else: mat2[r, c] = mat2[r, c] / (1 + 0.02 * abs(r - r_ideal))
+
+    # damp values further away from c_ideal
+    row, col = mat2.shape
+    # for idx, _ in enumerate(mat2):
+    for idx in range(row):
+        c_ideal = idx * col / row
+        for jdx in range(col):
+            if abs(jdx - c_ideal) > 3:
+                mat2[idx, jdx] = mat2[idx, jdx] / (1 + 0.02 * abs(jdx - c_ideal))
 
     _ = """
     mat2a = mat2.copy()
@@ -217,6 +268,7 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     # """
 
     if 'IPython' in sys.modules:
+    # if showplot:
         # plt.figure()
         # plt.contourf(mat2, levels=10, cmap="gist_heat_r")
         # plt.contourf(mat2, vmin=mat2.mean(), vmax=mat2.max(), cmap="gist_heat_r")
@@ -234,12 +286,27 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         ax = plt.axes()
 
         # sns.heatmap(mat2, ax=ax, cmap="gist_heat_r")
-        sns.heatmap(mat2, ax=ax, cmap="Blues", annot=annot, linewidths=linewidths)
         # sns.heatmap(mat2, linewidth=1/100/mat2.shape[0])
+        if str(scale) not in ["1"]:
+            sns.heatmap(mat2, ax=ax, cmap="Blues", annot=annot, linewidths=linewidths, vmax=mat2.mean() + 5 * mat2.std())
+        else:
+            sns.heatmap(mat2, ax=ax, cmap="Blues", annot=annot, linewidths=linewidths, vmax=mat2.mean() + 5 * mat2.std())
 
-        ax.set_title(" similarity scores for en (y-axis) and zh (x-axis)")
+        ax.set_title(" similarity scores for en (y-axis) vs zh (x-axis)")
 
         plt.show()
+
+    try:
+        import pandas as pd
+        # writer = pd.ExcelWriter("temp.xlsx")
+        # s_df.to_excel(writer)
+        # pd.DataFrame(mat2).to_excel(writer)
+        # writer.save()
+        color_table_applymap(mat2, file="temp.xlsx")
+        logger.info(" Saved to temp.xlsx")
+    except Exception as exc:
+        logger.error(exc)
+        # raise
 
     return mat2
 
@@ -252,6 +319,12 @@ def test_wu_ch3():
 
     text_en = "\n".join(elm.strip() for elm in read_text(path_en).splitlines() if elm.strip())
     text_zh = "\n".join(elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip())
+
+    # root = tk.Tk()
+    # root.withdraw()
+
+    # ans = tk.messagebox.askyesnocancel(" Generate user dict template?", "A user dict may help improve alignment. Continue?")
+
 
     mat2 = light_scores(text_en, text_zh)
 

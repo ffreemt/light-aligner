@@ -1,5 +1,7 @@
 """ read text """
 
+from typing import Union
+
 from pathlib import Path
 
 try:
@@ -10,7 +12,7 @@ except (ModuleNotFoundError, ImportError):
 from logzero import logger
 
 
-def read_text(filename):
+def read_text(filename: Union[str, Path]) -> str:
     """ read text from a file """
 
     if not Path(filename).exists():

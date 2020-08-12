@@ -2,9 +2,12 @@
 name = "light-aligner"
 version = "0.1.0"
 description = "a light-weight aligner."
-description-file="README.md"
+readme ="README.md"
 authors = ["ffreemt"]
-home-page="https://github.com/ffreemt/light-aligner"
+repository = "https://github.com/ffreemt/light-aligner"
+include = [
+    "LICENSE",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
@@ -21,6 +24,12 @@ pandas = "^1.1.0"
 matplotlib = "^3.3.0"
 seaborn = "^0.10.1"
 rank_bm25 = "^0.2.1"
+yaspin = "^1.0.0"
+linetimer = "^0.1.4"
+absl-py = "^0.9.0"
+diskcache = "^4.1.0"
+jinja2 = "^2.11.2"
+openpyxl = "^3.0.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
