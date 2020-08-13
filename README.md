@@ -17,6 +17,14 @@ E.g.
 * Centos: `yum install libicu`
 * OSX: `brew install icu4c`
 
+Then use `poetry` or `pip` to install ` PyICU pycld2 Morfessor`, e.g.
+```
+poetry add PyICU pycld2 Morfessor
+```
+or
+```
+pip install PyICU pycld2 Morfessor
+```
 ###### For Windows
 
 Download and install the `pyicu` and `pycld2` (possibly also `Morfessor`) whl packages for your OS/Python version from https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyicu and https://www.lfd.uci.edu/~gohlke/pythonlibs/#pycld2 (possibly also Morfessor https://www.lfd.uci.edu/~gohlke/pythonlibs/)
