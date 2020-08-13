@@ -1,4 +1,4 @@
-# Light-Aligner
+# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)
 A light-weight aligner for dual-texts (currently just Enlgish-Chinese) based on similariy scores using word for word "translation"
 
 ## Features
