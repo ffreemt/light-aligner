@@ -7,14 +7,17 @@ Refer to C:\dl\Dropbox\mat-dir\myapps\pytorch-nlp\rnn_embed\heatmap_nll.py
 """
 import sys
 import logging
+import pickle
+
 # import inspect
 import numpy as np
 import pytest
-import pickle
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
 
+
+# fmt: off
 def find_aligned_pairs(  # pylint: disable=too-many-branches, too-many-locals
         nll_matrix,  # nll matrix/cos_mat
         thr=0.8,  #
@@ -22,6 +25,7 @@ def find_aligned_pairs(  # pylint: disable=too-many-branches, too-many-locals
         numb=None,  # attempt to find numb pairs, overwrite thr
         matrix=False,  # if True, return t_set, prunned w_matrix
 ):
+    # fmt: on
     """Find aligned pairs given an nll matrix
 
     Arguments:
@@ -96,7 +100,7 @@ def find_aligned_pairs(  # pylint: disable=too-many-branches, too-many-locals
         # or other smaller values
         if max_ > int(min_ / 2):
             # print(pair, max_)
-            LOGGER.debug('pair: %s, max: %s', pair, max_)
+            LOGGER.debug("pair: %s, max: %s", pair, max_)
 
             # check the pair falls within a band
             idx, col_idx = pair
@@ -122,11 +126,11 @@ def setup_module(module):
     print("setup_module module:%s" % module.__name__)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def logging_setup():
-    '''
+    """
     # def setup_module(function):
-    setup module'''
+    setup module"""
     # print("setup_module function:%s" % function.__name__)
     print(" >>> logging_setup ")
     # http://pythontesting.net/framework/pytest/pytest-introduction/
@@ -140,63 +144,64 @@ def logging_setup():
         stream=sys.stdout,
     )
     logger = logging.getLogger()
-    logger.info(' info ')
+    logger.info(" info ")
+
 
 def test_wuch2_nllmatrix():
-    ''' test wuch2 nllmatrix'''
-    filename = r'nll_matrix_wuch2.pkl'
-    with open(filename, 'rb') as fhandle:
+    """ test wuch2 nllmatrix"""
+    filename = r"nll_matrix_wuch2.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix = pickle.load(fhandle)
     triple_set = find_aligned_pairs(nll_matrix)
     res = triple_set[0][0] if triple_set else None
-    assert res == 6, 'Expected to be {}'.format(res)
+    assert res == 6, "Expected to be {}".format(res)
 
 
 # def test_wuch2_nllmatrix_numb10(logging_setup):
 def test_wuch2_nllmatrix_numb10():
-    ''' test wuch2 nllmatrix'''
+    """ test wuch2 nllmatrix"""
 
-    filename = r'nll_matrix_wuch2.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = r"nll_matrix_wuch2.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix = pickle.load(fhandle)
     # triple_set = find_aligned_pairs(nll_matrix, numb=10)
     triple_set = find_aligned_pairs(nll_matrix, numb=10)
     res = triple_set[0][0] if triple_set else None
-    assert res == 6, 'Expected to be {}'.format(res)
+    assert res == 6, "Expected to be {}".format(res)
     # assert len(triple_set) == 10, 'Expected 10'
-    assert len(triple_set) == 10, 'Expected 10'
+    assert len(triple_set) == 10, "Expected 10"
 
 
 def test_nll_matrix_wuch3glove100_flel_pkl():
-    ''' test wuch2 nllmatrix'''
+    """ test wuch2 nllmatrix"""
 
-    filename = r'nll_matrix_wuch3glove100_flel.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = r"nll_matrix_wuch3glove100_flel.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix = pickle.load(fhandle)
     src_len, tgt_len = nll_matrix.shape
     triple_set = find_aligned_pairs(nll_matrix, numb=max(src_len, tgt_len))
     res = triple_set[0][0] if triple_set else None
-    assert res == 3, 'Expected to be {}'.format(res)
+    assert res == 3, "Expected to be {}".format(res)
     # assert len(triple_set) == 44, 'Expected 44'
-    assert len(triple_set) == 19, 'Expected 19'
+    assert len(triple_set) == 19, "Expected 19"
 
 
 def test_red_ch1():
-    ''' test_red_ch1 '''
+    """ test_red_ch1 """
 
-    filename = r'nll_matrix_redch1glove100_flel.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = r"nll_matrix_redch1glove100_flel.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix = pickle.load(fhandle)
     src_len, tgt_len = nll_matrix.shape
     triple_set = find_aligned_pairs(nll_matrix, numb=min(src_len, tgt_len))
     # 46, 31 (-4.46) ought to be 43, 31 (-1.66)
 
     res = triple_set[0][0] if triple_set else None
-    assert res == 23, 'Expected to be {}'.format(res)
-    assert len(triple_set) == 23, 'Expected 23'
+    assert res == 23, "Expected to be {}".format(res)
+    assert len(triple_set) == 23, "Expected 23"
     # assert triple_set[-6][:2] == (43, 31), 'ought to be (43, 31)'
     # [46, 34, -1.0531687]
-    assert triple_set[-1][:2] == [46, 34], 'ought to be (46, 34)'
+    assert triple_set[-1][:2] == [46, 34], "ought to be (46, 34)"
 
 
 if __name__ == "__main__":

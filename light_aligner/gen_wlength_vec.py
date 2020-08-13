@@ -18,7 +18,7 @@ def gen_wlength_vec(
         hint_language_code: Optional[str] = None,
 ) -> List[int]:
     # fmt: on
-    """
+    r"""
     gen word length vector
         text -> paras, text.splitlines()
         paras -> sents, Text(line).sentences

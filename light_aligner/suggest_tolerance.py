@@ -18,7 +18,6 @@ def suggest_tolerance(
 ) -> int:
     # fmt: on
     """ suggest a sensible tolerance for a matrix and coverage-rate (default 0.66).
-
     """
 
     mat = np.asarray(mat)

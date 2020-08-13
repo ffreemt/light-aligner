@@ -10,22 +10,23 @@ import os
 import sys
 from pathlib import Path
 import re
+
 import numpy as np
-import pandas as pd
+import pandas as pd  # pylint: disable=unused-import
 import matplotlib
 import matplotlib.pyplot as plt
-if "IPython" in sys.modules:
-    import seaborn as sns  # will also import IPython
-
-# import tkinter as tk  # for messagebox.askyesnocancel
 
 from polyglot.text import Detector
 
 from rank_bm25 import BM25Okapi
 
 from tqdm import tqdm
-from yaspin import yaspin
+
+# from yaspin import yaspin
 from logzero import logger
+
+if "IPython" in sys.modules:
+    import seaborn as sns  # will also import IPython
 
 from .read_text import read_text
 from .bingmdx_tr import bingmdx_tr
@@ -43,7 +44,11 @@ def remove_stopwords(text: str,) -> str:
     stopwords = [elm.strip() for elm in text_sw.splitlines() if elm.strip()]
 
     stopwords = stopwords[11:]  # keep 0...9
-    with yaspin():
+    # with yaspin():
+    if len(text) > 1500000:  # longer than 5 s, show progressbar
+        for elm in tqdm(stopwords, mininterval=0.2):
+            text = text.replace(elm, "")
+    else:
         for elm in stopwords:
             text = text.replace(elm, "")
     return text
@@ -54,10 +59,12 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         text1: Union[List[str], str],
         text2: Union[List[str], str],
         pairs: Optional[int] = None,
-        scale: str = "max",
+        scale: str = "max",  # "max" "maxo" "1"
         # tol: int = 10,
         showplot: bool = True,
-        extra_dict: dict = {},  # bingmdx_tr auto userdict.txt
+        saveplot: bool = True,
+        # extra_dict: dict = {},  # bingmdx_tr auto userdict.txt
+        extra_dict: Optional[dict] = None,  # bingmdx_tr auto userdict.txt
 ) -> np.ndarray:
     # fmt: on
     """
@@ -72,6 +79,8 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     pairs: attempt to collect pairs (default=half of the number of paras) of alignments
     tol: default 10, search along the main diagnal with 2 * tol width
     """
+    if extra_dict is None:
+        extra_dict = {}
 
     logger.info("scale: **%s**", scale)
 
@@ -87,9 +96,9 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     else:
         len2 = len(text2.splitlines())
 
-    Path("en.txt").write_text(text1, encoding="utf-8")
-    Path("zh.txt").write_text(text2, encoding="utf-8")
-    logger.info(" en.txt zh.txt saved")
+    # Path("en.txt").write_text(text1, encoding="utf-8")
+    # Path("zh.txt").write_text(text2, encoding="utf-8")
+    # logger.info(" en.txt zh.txt saved")
 
     lang1 = Detector(text1).language.code
     lang2 = Detector(text2).language.code
@@ -267,8 +276,15 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     plt.figure(); plt.contourf(mat2a, levels=40, cmap="gist_heat_r"); plt.colorbar()
     # """
 
-    if 'IPython' in sys.modules:
+    annot = False
+    linewidths = 0
+    if max(row, col) < 30:
+        annot = True
+        linewidths = 0.001 / max(row, col)
+
     # if showplot:
+    if 'IPython' in sys.modules and showplot:
+        import seaborn as sns
         # plt.figure()
         # plt.contourf(mat2, levels=10, cmap="gist_heat_r")
         # plt.contourf(mat2, vmin=mat2.mean(), vmax=mat2.max(), cmap="gist_heat_r")
@@ -276,14 +292,8 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         # plt.contourf(mat2, cmap="gist_heat_r", origin="upper")
         # plt.colorbar()
 
-        annot = False
-        linewidths = 0
-        if max(row, col) < 30:
-            annot = True
-            linewidths = 0.001 / max(row, col)
-
         plt.figure()
-        ax = plt.axes()
+        ax = plt.axes()  # pylin: disable=invalid-name
 
         # sns.heatmap(mat2, ax=ax, cmap="gist_heat_r")
         # sns.heatmap(mat2, linewidth=1/100/mat2.shape[0])
@@ -295,9 +305,23 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         ax.set_title(" similarity scores for en (y-axis) vs zh (x-axis)")
 
         plt.show()
+    # else:  # just save png and show, do not directly display
+    elif saveplot:  # just save png and show
+        import seaborn as sns
+        if str(scale) not in ["1"]:
+            snsplot = sns.heatmap(mat2, cmap="Blues", annot=annot, linewidths=linewidths, vmax=mat2.mean() + 5 * mat2.std())
+        else:
+            snsplot = sns.heatmap(mat2, cmap="Blues", annot=annot, linewidths=linewidths, vmax=mat2.mean() + 5 * mat2.std())
+        snsplot.axes.set_title(" similarity scores for en (y-axis) vs zh (x-axis)")
+        fig = snsplot.get_figure()
+        fig.savefig("score-matrix.png")
+        logger.info(" score matrix saved to score-matrix.png")
+        if sys.platform == "win32":
+            os.startfile("score-matrix.png")
 
+    _ = """
     try:
-        import pandas as pd
+        import pandas as pd  # pylint: disable=reimported
         # writer = pd.ExcelWriter("temp.xlsx")
         # s_df.to_excel(writer)
         # pd.DataFrame(mat2).to_excel(writer)
@@ -307,6 +331,7 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     except Exception as exc:
         logger.error(exc)
         # raise
+    # """
 
     return mat2
 

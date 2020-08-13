@@ -9,7 +9,12 @@ from light_aligner.read_text import read_text
 def test_light_scores_sanity():
     """ test_light_scores_sanity. """
     # res = light_scores(["test", 'try'] * 5, ["测试", '测验'] * 6)
-    res = light_scores(["test", 'try'], ["测试", '测验'])
+    res = light_scores(
+        ["test", "try"],
+        ["测试", "测验"],
+        showplot=False,
+        saveplot=False,
+    )
     assert res.size == 4
 
 
@@ -19,10 +24,19 @@ def test_wu_ch3():
     path_en = Path(dest) / "wu_ch3_en.txt"
     path_zh = Path(dest) / "wu_ch3_zh.txt"
 
-    text_en = "\n".join(elm.strip() for elm in read_text(path_en).splitlines() if elm.strip())
-    text_zh = "\n".join(elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip())
+    text_en = "\n".join(
+        elm.strip() for elm in read_text(path_en).splitlines() if elm.strip()
+    )
+    text_zh = "\n".join(
+        elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip()
+    )
 
-    mat2 = light_scores(text_en, text_zh)
+    mat2 = light_scores(
+        text_en,
+        text_zh,
+        showplot=False,
+        saveplot=False,
+    )
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat2, linewidth=0.01)
@@ -30,16 +44,26 @@ def test_wu_ch3():
 
     assert mat2.mean() > 0.2
 
+
 def test_lover_ch10():
     """ test lover ch 10"""
     # dest = r"c:\dl\Dropbox\mat-dir\myapps\data"
     dest = r"data"
     path_en = Path(dest) / "lover-ch10_en.txt"
     path_zh = Path(dest) / "lover-ch10_zh.txt"
-    text_en = "\n".join(elm.strip() for elm in read_text(Path(path_en)).splitlines() if elm.strip())
-    text_zh = "\n".join(elm.strip() for elm in read_text(Path(path_zh)).splitlines() if elm.strip())
+    text_en = "\n".join(
+        elm.strip() for elm in read_text(Path(path_en)).splitlines() if elm.strip()
+    )
+    text_zh = "\n".join(
+        elm.strip() for elm in read_text(Path(path_zh)).splitlines() if elm.strip()
+    )
 
-    mat10 = light_scores(text_en, text_zh)
+    mat10 = light_scores(
+        text_en,
+        text_zh,
+        showplot=False,
+        saveplot=False,
+    )
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat10, linewidth=0.01)
@@ -49,19 +73,29 @@ def test_lover_ch10():
     # assert mat10.mean() > 0.15
     assert mat10.mean() > 0.05
 
+
 def test_hlm_ch1():
     """ test hlm ch 1"""
     # dest = r"bumblebee-aligner\data"
     dest = r"data"
     path_en = Path(dest) / "hlm-ch1-en.txt"
     path_zh = Path(dest) / "hlm-ch1-zh.txt"
-    text_en = "\n".join(elm.strip() for elm in read_text(Path(path_en)).splitlines() if elm.strip())
-    text_zh = "\n".join(elm.strip() for elm in read_text(Path(path_zh)).splitlines() if elm.strip())
+    text_en = "\n".join(
+        elm.strip() for elm in read_text(Path(path_en)).splitlines() if elm.strip()
+    )
+    text_zh = "\n".join(
+        elm.strip() for elm in read_text(Path(path_zh)).splitlines() if elm.strip()
+    )
 
     paras_en = text_en.splitlines()
     paras_zh = text_zh.splitlines()
 
-    mat_hlm = light_scores(text_en, text_zh)
+    mat_hlm = light_scores(
+        text_en,
+        text_zh,
+        showplot=False,
+        saveplot=False,
+    )
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
 
@@ -79,10 +113,19 @@ def test_00test():
     path_en = Path(dest) / "0test_en.txt"
     path_zh = Path(dest) / "0test_zh.txt"
 
-    text_en = "\n".join(elm.strip() for elm in read_text(path_en).splitlines() if elm.strip())
-    text_zh = "\n".join(elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip())
+    text_en = "\n".join(
+        elm.strip() for elm in read_text(path_en).splitlines() if elm.strip()
+    )
+    text_zh = "\n".join(
+        elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip()
+    )
 
-    mat2 = light_scores(text_en, text_zh)
+    mat2 = light_scores(
+        text_en,
+        text_zh,
+        showplot=False,
+        saveplot=False,
+    )
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat2, linewidth=0.01)

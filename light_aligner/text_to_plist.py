@@ -16,13 +16,15 @@ def func():
 
 from typing import List, Optional, Union
 
-import numpy as np
-from itertools import zip_longest
 from threading import currentThread
+from itertools import zip_longest
 
+import numpy as np
 import langid
+
 # import blinker
 from polyglot.text import Detector
+
 # from diskcache import FanoutCache
 
 from logzero import logger
@@ -41,7 +43,7 @@ from light_aligner.single_or_dual import single_or_dual
 
 # fmt: off
 # @cache.memoize(typed=True, expire=36000, tag='text_to_plist')
-def text_to_plist(
+def text_to_plist(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         text_dual: Union[str, List[str]],
         langs: Optional[List[str]] = None,
 ) -> List[str]:
@@ -67,7 +69,7 @@ def text_to_plist(
 
     if len(langs) == 1:
         _ = [*zip_longest(paras, [""], [""], fillvalue="")]
-        c_thr.p_list = _
+        c_thr.p_list = _  # type: ignore  # special op
         return _
 
     # with timeme():  # 2094 ms
@@ -82,7 +84,7 @@ def text_to_plist(
         logger.warning("langs_info: %s, nothing to separate, returning original text as the first column with two empty columns", langs_info)
 
         _ = [*zip_longest(paras, "", "", fillvalue="")]
-        c_thr.p_list = _
+        c_thr.p_list = _  # type: ignore  # special op
         return _
 
     binary_info = [1]
@@ -118,8 +120,8 @@ def text_to_plist(
     # corr0 = bee_corr(left[1: _ + 1], right[:_]).diagonal()  # skip possible junk at the beginning
     # corr1 = bee_corr(left[1: _ + 1], right[1:_ +1]).diagonal()
 
-    corr0 = light_scores(left[1: _ + 1], right[:_]).diagonal()  # skip possible junk at the beginning
-    corr1 = light_scores(left[1: _ + 1], right[1:_ +1]).diagonal()
+    corr0 = light_scores(left[1: _ + 1], right[:_], showplot=False, saveplot=False).diagonal()  # skip possible junk at the beginning
+    corr1 = light_scores(left[1: _ + 1], right[1:_ + 1], showplot=False, saveplot=False).diagonal()
 
     if np.sum(corr0) > np.sum(corr1):
         p_list = [*zip_longest(left, [''] + right, fillvalue='')]

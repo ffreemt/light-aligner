@@ -11,8 +11,7 @@ from linetimer import CodeTimer
 
 from logzero import logger
 
-from light_aligner.bingmdx_tr import bingmdx_tr, MDX_DICT  # ,EHWD
-from light_aligner.read_text import read_text
+# from light_aligner.bingmdx_tr import bingmdx_tr, MDX_DICT  # ,EHWD
 
 
 # fmt: off
@@ -20,7 +19,6 @@ def suggest_udict_terms(
         text: Union[str, List[str]],
         silent: bool = False,
         spinner: bool = True,
-# ) -> List[str]:
 ) -> Tuple[List[str], List[str]]:
     # fmt: on
     """
@@ -38,7 +36,7 @@ def suggest_udict_terms(
         except Exception as exc:
             logger.error("%s", exc)
 
-    text_= "Processing... takes a few secs for short text..."
+    text_ = "Processing... takes a few secs for short text..."
     if silent:
         text_ = ""
 
@@ -46,12 +44,15 @@ def suggest_udict_terms(
     # if True:
 
     terms0, terms1 = [], []
+
     def doit():
+        """ doit. """
         nonlocal terms0, terms1
 
         with CodeTimer(unit="s", silent=silent):
             # terms = set([word for word, tag in TextBlob(read_text(filename)).tags if tag in ["NNP"]])
-            terms = set([word for word, tag in TextBlob(text).tags if tag in ["NNP"]])
+            _ = [word for word, tag in TextBlob(text).tags if tag in ["NNP"]]
+            terms = set(_)
 
             # terms = [term for term in terms if term.lower() not in EHWD]
             # terms = [term for term in terms if term.lower() == bingmdx_tr(term.lower())]

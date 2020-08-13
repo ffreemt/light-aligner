@@ -26,7 +26,7 @@ from light_aligner.gen_row_alignment import gen_row_alignment
 def light_aligner(  # pylint: disable=too-many-locals
         src_text: Union[list, str],
         tgt_text: Union[list, str],
-        cos_mat: Optional[np.ndarray] = None,  # correlation matrix from light_corr
+        cos_mat: Optional[np.ndarray] = None,  # score matrix from light_scores
         thr: Optional[float] = None,  # 1/1.618, golden radio = 1.618
         tol: int = 4,
         debug: Optional[bool] = False,
@@ -55,6 +55,7 @@ def light_aligner(  # pylint: disable=too-many-locals
     if not isinstance(tgt_text, list):  # pragma: no cover
         raise SystemExit(f'[{__file__}]: tgt_text [{type(tgt_text)}] is not a list, exiting...')
 
+    logger_level = logger.level
     if debug:
         logzero.loglevel(10)
     else:
@@ -99,4 +100,6 @@ def light_aligner(  # pylint: disable=too-many-locals
 
     c_th.para_list = para_list  # type: ignore
 
+    # restore logger loglevel
+    logzero.loglevel(logger_level)
     return para_list

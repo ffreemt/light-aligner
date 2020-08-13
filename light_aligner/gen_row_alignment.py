@@ -37,11 +37,11 @@ LOGGER.addHandler(logging.NullHandler())
 # print('Will [gen_row] be rerun?')
 
 
+# fmt: off
 def gen_row_alignment(  # pylint: disable=too-many-locals
-        t_set,
-        src_len,
-        tgt_len,
+    t_set, src_len, tgt_len,
 ):
+    # fmt: on
     """gen proper rows for given triple_set
 
     Arguments:
@@ -52,7 +52,7 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
         [np.array] -- [proper rows]
     """
 
-    t_set = np.array(t_set, dtype='object')
+    t_set = np.array(t_set, dtype="object")
 
     # len0 = src_len
 
@@ -60,11 +60,11 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
     len1 = tgt_len
 
     # rearrange t_set as buff in increasing order
-    buff = [[-1, -1, '']]  #
+    buff = [[-1, -1, ""]]  #
     idx_t = 0
     for elm in t_set:
         elm = t_set[idx_t]
-        LOGGER.debug('%s, %s', idx_t, elm)
+        LOGGER.debug("%s, %s", idx_t, elm)
 
         # find loc to insert
         elm0, elm1, elm2 = elm
@@ -84,7 +84,9 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
             if elm1 < next_elm:
                 # insert '' if necessary
                 # using zip_longest_middle
-                buff.insert(idx, [elm0, elm1, elm2], )
+                buff.insert(
+                    idx, [elm0, elm1, elm2],
+                )
                 # LOGGER.debug('---')
 
         idx_t += 1
@@ -96,7 +98,7 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
     # buff = np.array(buff, dtype='object')
 
     # take care of the tail
-    buff += [[src_len, tgt_len, '']]
+    buff += [[src_len, tgt_len, ""]]
 
     resu = []
     # merit = []
@@ -108,12 +110,10 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
         del elm2_, elm2
 
         tmp0 = zip_longest_middle(
-            list(range(elm0_ + 1, elm0)),
-            list(range(elm1_ + 1, elm1)),
-            fillvalue='',
+            list(range(elm0_ + 1, elm0)), list(range(elm1_ + 1, elm1)), fillvalue="",
         )
         # convet to list entries & attache merit
-        tmp = [list(t_elm) + [''] for t_elm in tmp0]
+        tmp = [list(t_elm) + [""] for t_elm in tmp0]
 
         # update resu
         resu += tmp + [buff[idx1]]
@@ -121,37 +121,41 @@ def gen_row_alignment(  # pylint: disable=too-many-locals
     # remove the last entry
     return resu[:-1]
 
+
 def test_wuch2():
     """test wuch2"""
 
-    filename = 't_set99_wuch2.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = "t_set99_wuch2.pkl"
+    with open(filename, "rb") as fhandle:
         tset_ch2 = pickle.load(fhandle)
 
     resu = gen_row_alignment(tset_ch2, 99, 106)
 
-    assert len(resu) >= 99, 'should be larger than 99'
+    assert len(resu) >= 99, "should be larger than 99"
 
     assert all(np.isclose(resu[0], [0, 0, -0.0062533836]))
 
-    entry = ['', 5, '']
+    entry = ["", 5, ""]
     idx = resu.index(entry)
     resu_ = resu[idx]
     assert all([elm == resu_[idx] for idx, elm in enumerate(entry)])
 
-    entry = ['', 95, '']
+    entry = ["", 95, ""]
     idx = resu.index(entry)
     resu_ = resu[idx]
     assert all([elm == resu_[idx] for idx, elm in enumerate(entry)])
 
-    assert all(np.isclose(resu[-1], [98, 105, -3.1654365])), (np.array(resu).shape, resu[-1])
+    assert all(np.isclose(resu[-1], [98, 105, -3.1654365])), (
+        np.array(resu).shape,
+        resu[-1],
+    )
 
 
 def test_wuch1():
     """test wuch1"""
 
-    filename = 'nll_matrix_wuch1.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = "nll_matrix_wuch1.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix_ch1 = pickle.load(fhandle)
 
     # old gen_nllmatrix
@@ -163,13 +167,13 @@ def test_wuch1():
     src_len, tgt_len = nll_matrix_ch1.shape
     resu_ch1 = gen_row_alignment(tset_ch1, src_len, tgt_len)
 
-    assert len(resu_ch1) >= src_len, 'should be larger than 99'
+    assert len(resu_ch1) >= src_len, "should be larger than 99"
 
     assert all(np.isclose(resu_ch1[0], [0, 0, -0.02035301]))
 
     assert all(np.isclose(resu_ch1[-2], [28, 31, -0.020703452]))
 
-    entry = [29, 32, '']
+    entry = [29, 32, ""]
     idx = resu_ch1.index(entry)
     resu_ = resu_ch1[idx]
     assert all([elm == resu_[idx] for idx, elm in enumerate(entry)])
@@ -184,11 +188,12 @@ def test_wuch1():
     #     print('\n', en[0][elm[0]] if elm[0] else '')
     #     print(zh[0][elm[1]] if elm[1] else '', elm[2])
 
+
 def test_wuch1a():
     """test wuch1a find_aligned_pairs(nll_matrix_ch1, numb=30)"""
 
-    filename = 'nll_matrix_wuch1.pkl'
-    with open(filename, 'rb') as fhandle:
+    filename = "nll_matrix_wuch1.pkl"
+    with open(filename, "rb") as fhandle:
         nll_matrix_ch1 = pickle.load(fhandle)
 
     # old gen_nllmatrix
@@ -200,17 +205,17 @@ def test_wuch1a():
     tset_ch1 = find_aligned_pairs(nll_matrix_ch1, numb=src_len)
     resu_ch1 = gen_row_alignment(tset_ch1, src_len, tgt_len)
 
-    assert len(resu_ch1) >= src_len, 'should be larger than 99'
+    assert len(resu_ch1) >= src_len, "should be larger than 99"
 
     assert all(np.isclose(resu_ch1[0], [0, 0, -0.02035301]))
     assert all(np.isclose(resu_ch1[-2], [28, 31, -0.020703452]))
 
-    entry = ['', 25, '']
+    entry = ["", 25, ""]
     idx = resu_ch1.index(entry)
     resu_ = resu_ch1[idx]
     assert all([elm == resu_[idx] for idx, elm in enumerate(entry)])
 
-    assert resu_ch1[27] == ['', 25, '']
+    assert resu_ch1[27] == ["", 25, ""]
     # assert False, resu_ch1
 
     # entxt = 'wu_ch1_en.txt'

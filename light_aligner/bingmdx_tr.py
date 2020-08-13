@@ -95,18 +95,20 @@ map_tags = dict(  # pylint: disable=invalid-name
     ]
 )
 
+_ = """
 logger = setup_logger(  # pylint: disable=invalid-name
     name = __file__,
     level = 20,  #info
 )
 logger.info("logger.name: %s", logger.name)
+# """
 
 # fmt: off
 def bingmdx_tr(
-    sent: Union[List[str], str],
-    extra_dict: Optional[dict] = None,
+        sent: Union[List[str], str],
+        extra_dict: Optional[dict] = None,
 ) -> str:
-    # fmt:on
+    # fmt: on
     """ use msbing mdx "traslate" sent to chinese.
 
     TODO: user defined dict takes precedence
@@ -190,11 +192,13 @@ def bingmdx_tr(
             list_zh.append(word)
             continue
 
-        logger.debug("count: %s", count)
-        logger.debug(" textblob tag: %s", tag)
+        # logger.debug("count: %s", count)
+        # logger.debug(" textblob tag: %s", tag)
+
         tag = map_tags.get(tag)  # map to binmdx tag
-        logger.debug("msbing tag: %s", tag)
-        logger.debug("word: %s", word)
+
+        # logger.debug("msbing tag: %s", tag)
+        # logger.debug("word: %s", word)
 
         if not tag:  # for empty tags, return everything
             word_tr = "".join([elm for elm in res.values()])
