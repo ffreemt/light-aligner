@@ -31,3 +31,30 @@ Download and install the `pyicu` and `pycld2` (possibly also `Morfessor`) whl pa
 
 ### Installation
 ```pip install light-aligner``` (Not yet ready)
+or
+Clone the repo and install necessary packages using `pip`:
+```
+git clone git@github.com:ffreemt/light-aligner.git
+cd light-aigner
+pip install -r requirements.txt
+```
+or
+Clone the repo and install necessary packages using `poetry`
+```
+git clone git@github.com:ffreemt/light-aligner.git
+cd light-aigner
+poetry install -v
+```
+This also works in `Linux/OSX`. In fact, the build process in github (pertaining to that github workflow badge ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)) is carried out in Linux.
+
+
+### Usage
+
+```
+cd light-aligner
+python -m light-aligner
+```
+
+You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.
+
+Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can be switched to English i fso desired.
