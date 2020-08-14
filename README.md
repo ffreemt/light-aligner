@@ -1,4 +1,4 @@
-# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)[![PyPI version](https://badge.fury.io/py/light-aligner.svg)](https://badge.fury.io/py/light-aligner)
+# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)[![PyPI version](https://badge.fury.io/py/light-aligner.svg)](https://badge.fury.io/py/light-aligner)
 
 A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 
@@ -57,4 +57,4 @@ python -m light-aligner
 
 You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.
 
-Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can be switched to English i fso desired.
+Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can be switched to English if so desired.
