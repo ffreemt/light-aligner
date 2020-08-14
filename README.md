@@ -7,7 +7,7 @@ A light-weight aligner for dual-texts (currently just English-Chinese) based on 
 * No internet required
 
 ## Special Dependencies
-Light-Aligner depends on polyglot that depends on `libicu`
+`light aligner` depends on polyglot that in turn depends on `libicu`
 
 To install `libicu`
 ###### For Linux/OSX
@@ -31,22 +31,21 @@ Download and install the `pyicu` and `pycld2` (possibly also `Morfessor`) whl pa
 
 ### Installation
 ```pip install light-aligner```
-or
-Clone the repo and install necessary packages using `pip`:
+
+or, clone the repo and install necessary packages using `pip`:
 ```
 git clone git@github.com:ffreemt/light-aligner.git
 cd light-aigner
 pip install -r requirements.txt
 ```
-or
-Clone the repo and install necessary packages using `poetry`
+or, clone the repo and install necessary packages using `poetry`
 ```
 git clone git@github.com:ffreemt/light-aligner.git
 cd light-aigner
 poetry install -v
 ```
-This also works in `Linux/OSX`. In fact, the build process in github (pertaining to that github workflow badge ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)) is carried out in Linux.
 
+`light aligner` can be run in `Linux/OSX`. In fact, the build process in github (pertaining to that github workflow badge ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)) is carried out in Linux.
 
 ### Usage
 
