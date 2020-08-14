@@ -30,7 +30,7 @@ pip install PyICU pycld2 Morfessor
 Download and install the `pyicu` and `pycld2` (possibly also `Morfessor`) whl packages for your OS/Python version from https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyicu and https://www.lfd.uci.edu/~gohlke/pythonlibs/#pycld2 (possibly also Morfessor https://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
 ### Installation
-```pip install light-aligner``` (Not yet ready)
+```pip install light-aligner```
 or
 Clone the repo and install necessary packages using `pip`:
 ```
