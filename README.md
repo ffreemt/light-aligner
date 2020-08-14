@@ -57,4 +57,4 @@ python -m light-aligner
 
 You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.
 
-Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can be switched to English if so desired.
+Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can switch to English if so desired.
