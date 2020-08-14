@@ -3,8 +3,8 @@
 A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 
 ## Features
-* Fast
-* Low resources demand
+* `Light-weigh`, low resources demand
+* `Lightning` fast, well maybe not `lightning` fast but quite fast
 * No internet required
 
 ## Special Dependencies
