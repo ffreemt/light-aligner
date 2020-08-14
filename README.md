@@ -3,7 +3,7 @@
 A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 
 ## Features
-* `Light-weigh`, low resources demand
+* `Light-weight`, low resources demand
 * `Lightning` fast, well maybe not `lightning` fast but quite fast
 * No internet required
 
@@ -57,6 +57,6 @@ python -m light-aligner
 
 You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.
 
-Join qq-group 316287378 ![qrcode]
+Join qq-group 316287378
 <img src="https://raw.githubusercontent.com/ffreemt/light-aligner/master/data/Transtoolweb%2B%E5%8F%8C%E8%AF%AD%E5%AF%B9%E9%BD%90%E7%BE%A4%E8%81%8A%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="qrcode" style="width:100px;"/>
 if you have any questions. The group chat is normally in Chinese but can switch to English if so desired.
