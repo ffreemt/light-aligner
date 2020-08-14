@@ -46,7 +46,7 @@ cd light-aigner
 poetry install -v
 ```
 
-`light aligner` can be run in `Linux/OSX`. In fact, the build process in github (pertaining to that github workflow badge ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)) is carried out in Linux.
+`light aligner` can be run in `Linux/OSX`. In fact, the build process in github (pertaining to that github workflow badge ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg) is carried out in Linux.
 
 ### Usage
 
@@ -57,4 +57,6 @@ python -m light-aligner
 
 You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.
 
-Join qq-group 316287378 if you have any questions. The group chat is normally in Chinese but can switch to English if so desired.
+Join qq-group 316287378 ![qrcode]
+<img src="https://raw.githubusercontent.com/ffreemt/light-aligner/master/data/Transtoolweb%2B%E5%8F%8C%E8%AF%AD%E5%AF%B9%E9%BD%90%E7%BE%A4%E8%81%8A%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="qrcode" style="width:100px;"/>
+if you have any questions. The group chat is normally in Chinese but can switch to English if so desired.
