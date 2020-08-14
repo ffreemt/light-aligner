@@ -1,5 +1,6 @@
-# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)
-A light-weight aligner for dual-texts (currently just English-Chinese) based on similariy scores using word for word "translation"
+# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)[![PyPI version](https://badge.fury.io/py/light-aligner.svg)](https://badge.fury.io/py/light-aligner)
+
+A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 
 ## Features
 * Fast
