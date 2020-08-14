@@ -13,4 +13,10 @@ def test_plist_to_slist1():
     df.replace(np.nan, "", inplace=True)
 
     plist = df.to_numpy()
-    assert 1  # TODO
+    slist = plist_to_slist(plist)
+
+    assert "Chapter" in slist[0][0]
+    assert "章" in slist[0][1]
+
+    assert "In fact" in slist[10][0]
+    assert "事实上" in slist[10][1]
