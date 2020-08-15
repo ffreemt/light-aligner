@@ -52,7 +52,12 @@ poetry install -v
 
 ```
 cd light-aligner
-python -m light-aligner
+python -m light_aligner
+```
+or
+```
+cd light-aligner
+python light_aligner.__main__.py
 ```
 
 You may wish to use powershell (e.g., right click the powershell script`run-python-m.ps1` and select `Run with Powershell`) or conemu or cmder for better visual terminal experience.

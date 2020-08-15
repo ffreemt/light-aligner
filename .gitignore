@@ -35,3 +35,5 @@ gh-pages-pull-memo.txt
 .pytest_cache
 lareload.py
 tests/__pycache__
+light_aligner.spec
+poetry-run-pyinstaller.bat
