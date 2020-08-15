@@ -1,4 +1,4 @@
-# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)[![PyPI version](https://badge.fury.io/py/light-aligner.svg)](https://badge.fury.io/py/light-aligner)
+# Light-Aligner ![build](https://github.com/ffreemt/light-aligner/workflows/build/badge.svg)[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)[![PyPI version](https://badge.fury.io/py/light-aligner.svg)](https://badge.fury.io/py/light-aligner)
 
 A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 

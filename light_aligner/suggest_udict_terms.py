@@ -12,6 +12,7 @@ from linetimer import CodeTimer
 from logzero import logger
 
 # from light_aligner.bingmdx_tr import bingmdx_tr, MDX_DICT  # ,EHWD
+from light_aligner.bingmdx_tr import MDX_DICT  # ,EHWD
 
 
 # fmt: off

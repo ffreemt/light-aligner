@@ -31,12 +31,13 @@ def plist_to_slist(  # pylint: disable=too-many-arguments
 
         plist = [elm.split("\t")[:3] for elm in _ if len(elm.split("\t")) > 2]  # pylint: disable=len-as-condition
         if not len(plist):
-            logger.error(" %s does not appear to be properly formated", text[:100])
+            logger.error(" %s does not appear to be properly formatted", text[:100])
             raise Exception("Invalid data")
 
     plist = np.asarray(plist)
     # use the first three columns
     assert plist.shape[1] > 2, "Invalid data"  # type: ignore
+    shape = np.asarray(plist).shape
 
     # if not np.all(plist): raise Exception("Empty plist")
 
@@ -66,7 +67,7 @@ def plist_to_slist(  # pylint: disable=too-many-arguments
     if not locs:  # empty
         logger.warning(" the score column (3rd col) does not contain any valid value, something is probably wrong. We proceed nevertheless. ")
 
-    curr_pos = plist.shape[0]  # type: ignore
+    curr_pos = shape[0]  # type: ignore
     if len(locs) / curr_pos < 0.2:
         logger.warning("Only about %.2f%% of the paras are aligned with certain confidence, sent level alignment quality will likely be poor.", len(locs) / curr_pos * 100)
 
@@ -118,9 +119,9 @@ def plist_to_slist(  # pylint: disable=too-many-arguments
         sents_pair.extend(_)
 
     # last entry
-    _ = "\n".join(plist[:, 0][locs[-1]:]).strip()  # type: ignore
+    _ = plist[:, 0][locs[-1]].strip()  # type: ignore
     left = _
-    right = "\n".join(plist[:, 1][locs[-1]:]).strip()  # type: ignore
+    right = plist[:, 1][locs[-1]].strip()  # type: ignore
     try:
         _ = align(left, right)
     except Exception as exc:
@@ -128,6 +129,17 @@ def plist_to_slist(  # pylint: disable=too-many-arguments
         _ = [[left, right]]
     sents_pair.extend(_)
 
+    # possible tail
+    if shape[0] > locs[-1]:
+        _ = "\n".join(plist[:, 0][locs[-1] + 1:]).strip()  # type: ignore
+        left = _
+        right = "\n".join(plist[:, 1][locs[-1] + 1:]).strip()  # type: ignore
+        try:
+            _ = align(left, right)
+        except Exception as exc:
+            logger.warning(" align (middle) exc: %s, deliver the original", exc)
+            _ = [[left, right]]
+        sents_pair.extend(_)
     # return [["", "x"], ["a", "b"]]
     return sents_pair
 

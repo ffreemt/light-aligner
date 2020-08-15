@@ -9,12 +9,7 @@ from light_aligner.read_text import read_text
 def test_light_scores_sanity():
     """ test_light_scores_sanity. """
     # res = light_scores(["test", 'try'] * 5, ["测试", '测验'] * 6)
-    res = light_scores(
-        ["test", "try"],
-        ["测试", "测验"],
-        showplot=False,
-        saveplot=False,
-    )
+    res = light_scores(["test", "try"], ["测试", "测验"], showplot=False, saveplot=False,)
     assert res.size == 4
 
 
@@ -31,12 +26,7 @@ def test_wu_ch3():
         elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip()
     )
 
-    mat2 = light_scores(
-        text_en,
-        text_zh,
-        showplot=False,
-        saveplot=False,
-    )
+    mat2 = light_scores(text_en, text_zh, showplot=False, saveplot=False,)
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat2, linewidth=0.01)
@@ -58,12 +48,7 @@ def test_lover_ch10():
         elm.strip() for elm in read_text(Path(path_zh)).splitlines() if elm.strip()
     )
 
-    mat10 = light_scores(
-        text_en,
-        text_zh,
-        showplot=False,
-        saveplot=False,
-    )
+    mat10 = light_scores(text_en, text_zh, showplot=False, saveplot=False,)
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat10, linewidth=0.01)
@@ -90,12 +75,7 @@ def test_hlm_ch1():
     paras_en = text_en.splitlines()
     paras_zh = text_zh.splitlines()
 
-    mat_hlm = light_scores(
-        text_en,
-        text_zh,
-        showplot=False,
-        saveplot=False,
-    )
+    mat_hlm = light_scores(text_en, text_zh, showplot=False, saveplot=False,)
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
 
@@ -120,12 +100,7 @@ def test_00test():
         elm.strip() for elm in read_text(path_zh).splitlines() if elm.strip()
     )
 
-    mat2 = light_scores(
-        text_en,
-        text_zh,
-        showplot=False,
-        saveplot=False,
-    )
+    mat2 = light_scores(text_en, text_zh, showplot=False, saveplot=False,)
 
     # plt.figure(26); plt.contourf(mat2, levels=40, cmap="gist_heat_r")
     # sns.heatmap(mat2, linewidth=0.01)

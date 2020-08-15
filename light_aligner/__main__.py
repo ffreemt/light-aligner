@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-# import tkinter as tk
+import tkinter as tk
 from tkinter import messagebox
 
 # pylint: disable=unused-import
@@ -18,7 +18,8 @@ from jinja2 import (  # type: ignore  # noqa: F401
 # pylint: enable=unused-import
 
 # import torch
-# import numpy as np
+import numpy as np
+import pandas as pd
 from absl import app, flags  # type: ignore
 from prompt_toolkit import HTML, print_formatted_text, prompt
 
@@ -40,7 +41,11 @@ from light_aligner.single_or_dual import single_or_dual
 from light_aligner.text_to_plist import text_to_plist
 
 from light_aligner.load_paras import load_paras
-# from light_aligner.tkroot import tkroot  # pylint: disable=unused-import
+from light_aligner.load_xlsx import load_xlsx
+from light_aligner.check_anchors import check_anchors
+
+# from light_aligner.align_sents import align_sents
+from light_aligner.plist_to_slist import plist_to_slist
 
 # tkroot = tk.Tk()  # pylint: disable=invalid-name
 
@@ -113,6 +118,8 @@ def main(argv):
 
         s_or_d = single_or_dual(src_text)
         if "en" in s_or_d and "zh" in s_or_d:
+            root = tk.Tk()
+            root.withdraw()
             ans = messagebox.askyesnocancel(
                 "Dual-lang %s detected" % s_or_d,
                 "Light-aligner thinks this is a dual-language %s file. Do you want to treat it as such?"
@@ -126,12 +133,13 @@ def main(argv):
             p_list = text_to_plist(src_text)
 
             parent = Path(src_file).absolute().parent
-            src_stem = Path(src_file).stem
+            # src_stem = Path(src_file).stem
+            stem = Path(src_file).stem
             suffix = ".xlsx"
             # tgt_stem = Path(tgt_file).stem
-            # stem = common_prefix([src_stem, tgt_stem])
+            # stem = common_prefix([stem, tgt_stem])
             # out_file = f'{parent / stem}-thr{thr}-tol{tol}{suffix}'
-            out_file = f"{parent / src_stem}{suffix}"
+            out_file = f"{parent / stem}{suffix}"
 
             out_file = gen_filename(out_file)
 
@@ -144,13 +152,82 @@ def main(argv):
             logger.info("\n\t Opening **[%s]**", Path(out_file).absolute())
 
             # if args.get('startfile'):
-            if sys.platform.startswith("win"):
-                os.startfile(out_file)  # type: ignore
+            if sys.platform == "win32":
+                os.startfile(out_file)
 
             # end of align and save
             # need to reset src_file tgt_file?
 
+            # +++++++++++++++
+            # align sents for dual ... get user input (out_file->out_file_s)
+            root = tk.Tk()
+            root.withdraw()
+            ans = messagebox.askyesno(
+                " Align sents ",
+                "We now proceed to aligning sentences. You may wish to edit %s and save before the next step. Continue?",
+            )
+            logger.info("messagebox.askyesno ans: %s", ans)
+
+            if ans:
+                try:
+                    anchors = 0
+                    res = load_xlsx(out_file, anchors=anchors)
+                except Exception as exc:
+                    logger.error(" load_xlsx: %s", exc)
+                    res = None
+
+                if not (isinstance(res, int) or res is None):
+
+                    anchors = check_anchors(res)
+
+                    ans = True
+                    if anchors < 1:
+                        root = tk.Tk()
+                        root.withdraw()
+                        ans = messagebox.askyesno(
+                            " No anchors found!",
+                            "This is likely invalid data. We can proceed. But the result may not be that good for long texts. Continue?",
+                        )
+                    if ans:  # continue if anchors > 0 or anchors == 0 and ans == True
+                        try:
+                            # sents = align_sents(res)
+                            slist = plist_to_slist(res)
+                        except Exception as exc:
+                            logger.error("align_sents: %s", exc)
+                            slist = ""
+
+                        if slist:
+                            out_file_s = f"{Path(out_file).parent / stem}-s{suffix}"
+                            out_file_s = gen_filename(out_file_s)
+                            try:
+                                writer = pd.ExcelWriter(out_file_s)
+                                pd.DataFrame(slist).to_excel(writer, index=None, header=None)
+                                writer.save()
+                                flag = True
+                            except Exception as exc:
+                                logger.error(" save aligned sents exc: %s", exc)
+                                flag = False
+                            if flag:
+                                logger.info(
+                                    " aligned sents saved to *%s*",
+                                    Path(out_file_s).absolute()
+                                )
+
+                                logger.info(
+                                    "\n\t Opening **[%s]**", Path(out_file_s).absolute()
+                                )
+
+                                if sys.platform == "win32":
+                                    os.startfile(out_file_s)
+
+                # ---
+            else:
+                root = tk.Tk()
+                root.withdraw()
+                messagebox.showinfo(" Next ", "Alrihgt, it's your choice.")
             # get user input
+            # ---------------
+
             user_input = prompt(
                 HTML(
                     "Press <ansigreen>any key</ansigreen> then <ansigreen>Enter</ansigreen> to align other files, or press <ansired>q</ansired> then <ansired>Enter</ansired> to quit: "
@@ -229,7 +306,7 @@ def main(argv):
         tgt_stem = Path(tgt_file).stem
         stem = common_prefix([src_stem, tgt_stem])
         # out_file = f'{parent / stem}-thr{thr}-tol{tol}{suffix}'
-        out_file = f"{parent / stem}{suffix}"
+        out_file = f"{parent / stem}-p{suffix}"
 
         out_file = gen_filename(out_file)
 
@@ -242,12 +319,72 @@ def main(argv):
         logger.info("\n\t Opening **[%s]**", Path(out_file).absolute())
 
         # if args.get('startfile'):
-        if sys.platform.startswith("win"):
-            os.startfile(out_file)  # type: ignore
+        if sys.platform == "win32":
+            os.startfile(out_file)
 
-        # end of align and save
+        # end of para align and save
+
+        # +++++++++++++++
+        # align sents ... get user input
+        root = tk.Tk()
+        root.withdraw()
+        ans = messagebox.askyesno(
+            " Align sents ",
+            "We now proceed to aligning sentences. You may wish to edit %s and save before the next step. Continue?",
+        )
+
+        if ans:
+            try:
+                anchors = 0
+                res = load_xlsx(out_file, anchors=anchors)
+            except Exception as exc:
+                logger.error(" load_xlsx: %s", exc)
+                res = None
+
+            if not (isinstance(res, int) or res is None):
+
+                anchors = check_anchors(res)
+
+                ans = True
+                if anchors < 1:
+                    root = tk.Tk()
+                    root.withdraw()
+                    ans = messagebox.askyesno(
+                        " No anchors found!",
+                        "This is likely invalid data. We can proceed. But the result may not be that good for long texts. Continue?",
+                    )
+                if ans:  # continue if anchors > 0 or anchors == 0 and ans == True
+                    try:
+                        # sents = align_sents(res)
+                        slist = plist_to_slist(res)
+                    except Exception as exc:
+                        logger.error("align_sents: %s", exc)
+                        slist = ""
+
+                    if slist:
+                        out_file_s = f"{Path(out_file).parent / stem}-s{suffix}"
+                        out_file_s = gen_filename(out_file_s)
+                        try:
+                            writer = pd.ExcelWriter(out_file_s)
+                            pd.DataFrame(slist).to_excel(
+                                writer, index=None, header=None
+                            )
+                            writer.save()
+                            flag = True
+                        except Exception as exc:
+                            logger.error(" save aligned sents exc: %s", exc)
+                            flag = False
+                        if flag:
+                            logger.info(" aligned sents saved to *%s*", out_file_s)
+            # ---
+        else:
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showinfo(" Next ", "Alrihgt, it's your choice.")
 
         # get user input
+        # ---------------
+
         user_input = prompt(
             HTML(
                 "Press <ansigreen>any key</ansigreen> then <ansigreen>Enter</ansigreen> to align other files, or press <ansired>q</ansired> then <ansired>Enter</ansired> to quit: "

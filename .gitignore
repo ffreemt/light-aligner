@@ -30,3 +30,7 @@ mydialog.py
 light_aligner/ga_ch.py
 bk
 hlm1.py
+gh-pages-pull-memo.txt
+.mypy_cache
+.pytest_cache
+lareload.py
