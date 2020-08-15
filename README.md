@@ -2,6 +2,8 @@
 
 A light-weight aligner for dual-text (currently just English-Chinese) alignment based on similariy scores using word for word "translation"
 
+中文版读我 https://github.com/ffreemt/light-aligner/blob/master/README-zh.md
+
 ## Features
 * `Light-weight`, low resources demand
 * `Lightning` fast, well maybe not `lightning` fast but quite fast

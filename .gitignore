@@ -37,3 +37,4 @@ lareload.py
 tests/__pycache__
 light_aligner.spec
 poetry-run-pyinstaller.bat
+light_aligner-files

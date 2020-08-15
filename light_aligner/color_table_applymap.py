@@ -85,7 +85,7 @@ def color_table_applymap(lst, lower=0, upper=1, file=None, reverse=False):
             )
         return ""
 
-    s_df = df_lst.style.applymap(
+    s_df = df_lst.style.applymap(  # style depends on jinja2?
         lambda data: _color_func_g(data, lower, upper), subset=columns,
     )
 

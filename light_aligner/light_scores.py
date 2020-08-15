@@ -28,11 +28,11 @@ from logzero import logger
 if "IPython" in sys.modules:
     import seaborn as sns  # will also import IPython
 
-from .read_text import read_text
-from .bingmdx_tr import bingmdx_tr
+from light_aligner.read_text import read_text
+from light_aligner.bingmdx_tr import bingmdx_tr
 from light_aligner.suggest_udict_terms import suggest_udict_terms
 from light_aligner.text2udict import text2udict
-from light_aligner.color_table_applymap import color_table_applymap
+# from light_aligner.color_table_applymap import color_table_applymap
 
 # matplotlib.use("TkAgg")
 
@@ -45,7 +45,7 @@ def remove_stopwords(text: str,) -> str:
 
     stopwords = stopwords[11:]  # keep 0...9
     # with yaspin():
-    if len(text) > 1500000:  # longer than 5 s, show progressbar
+    if len(text) > 30000:  # longer than 10s/10000 char, show progressbar
         for elm in tqdm(stopwords, mininterval=0.2):
             text = text.replace(elm, "")
     else:
@@ -158,7 +158,16 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
 
     # remove stopwords
     # _ = remove_stopwords(text_zh)
-    corpus = [remove_stopwords(elm).strip() for elm in paras_zh]
+    # corpus = [remove_stopwords(elm).strip() for elm in paras_zh]
+    corpus = []
+    len_ = len(paras_zh)
+    for idx, elm in enumerate(paras_zh):
+        corpus.append(remove_stopwords(elm).strip())
+        if not idx % 10:
+            logger.info(" %s/%s ", idx + 1, len_)
+        elif idx < len_ - 5:
+            logger.info(" %s/%s ", idx + 1, len_)
+
     assert len(corpus) == len(paras_zh)
 
     logger.info(" Doing some processing...")
@@ -191,7 +200,10 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
 
         corr_mat.append(corr)
 
-        logger.debug(" %s/%s ", idx + 1, _)
+        if not idx % 10:
+            logger.info(" %s/%s ", idx + 1, _)
+        elif idx > len(paras_en) - 4:
+            logger.info(" %s/%s ", idx + 1, _)
 
     logger.debug(" score matrix done ")
 
@@ -217,7 +229,7 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
     # plt.figure(22)
     # plt.contourf(mat2, levels=40, cmap="gist_heat_r")
 
-    import pandas as pd
+    # import pandas as pd
 
     df2 = pd.DataFrame(mat2).copy()
     # procesing columns the same way
@@ -326,14 +338,14 @@ def light_scores(  # pylint: disable=too-many-locals, too-many-branches, too-man
         # s_df.to_excel(writer)
         # pd.DataFrame(mat2).to_excel(writer)
         # writer.save()
-        color_table_applymap(mat2, file="temp.xlsx")
+        color_table_applymap(mat2, file="temp.xlsx")  # commented out
         logger.info(" Saved to temp.xlsx")
     except Exception as exc:
         logger.error(exc)
         # raise
     # """
 
-    return mat2
+    return mat2.copy()
 
 
 def test_wu_ch3():

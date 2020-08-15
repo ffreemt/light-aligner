@@ -8,12 +8,14 @@ import tkinter as tk
 from tkinter import messagebox
 
 # pylint: disable=unused-import
+_ = """
 from jinja2 import (  # type: ignore  # noqa: F401
     PackageLoader,
     Environment,
     ChoiceLoader,
     FileSystemLoader,
 )
+# """  # pyinstaller packing difficulties
 
 # pylint: enable=unused-import
 
@@ -33,7 +35,8 @@ from logzero import logger
 from light_aligner import __version__
 from light_aligner.light_aligner import light_aligner
 
-from light_aligner.color_table_applymap import color_table_applymap
+# from light_aligner.color_table_applymap import color_table_applymap
+from light_aligner.save_xlsx import save_xlsx
 from light_aligner.common_prefix import common_prefix
 from light_aligner.gen_filename import gen_filename
 from light_aligner.browse_filename import browse_filename
@@ -145,7 +148,8 @@ def main(argv):
 
             logger.debug(" out_file: %s", out_file)
 
-            color_table_applymap(p_list, file=out_file)
+            # color_table_applymap(p_list, file=out_file)
+            save_xlsx(p_list, file=out_file)
 
             logger.info("\n\tFile written to **[%s]**", Path(out_file).absolute())
 
@@ -312,7 +316,9 @@ def main(argv):
 
         logger.debug(" out_file: %s", out_file)
 
-        color_table_applymap(p_list, file=out_file)
+        # color_table_applymap(p_list, file=out_file)
+        save_xlsx(p_list, file=out_file)
+
 
         logger.info("\n\tFile written to **[%s]**", Path(out_file).absolute())
 
