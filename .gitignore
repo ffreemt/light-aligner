@@ -34,3 +34,4 @@ gh-pages-pull-memo.txt
 .mypy_cache
 .pytest_cache
 lareload.py
+tests/__pycache__
