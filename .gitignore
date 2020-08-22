@@ -38,3 +38,11 @@ tests/__pycache__
 light_aligner.spec
 poetry-run-pyinstaller.bat
 light_aligner-files
+diskcache-try.py
+data\stardict-dict-de
+german-lemma-pystardict-diskcache-try.py
+de_tagger.pkl
+ClassifierBasedGermanTagger.py
+tiger_release_aug07.corrected.16012013.conll0
+data/*.mdx
+light_aligner/__pycache__

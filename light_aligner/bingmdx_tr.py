@@ -33,7 +33,7 @@ HWD_FILE = Path(DIR_PATH, "msbing_c_e_hw.msgpk")
 EHWD_FILE = Path(DIR_PATH, "msbing_c_e_ehw.msgpk")
 MDX_DICT = msgpack.load(open(DICT_FILE, "rb"))
 HWD = msgpack.load(open(HWD_FILE, "rb"))  # Chinese header words in MSBING.mdx
-EHWD = msgpack.load(open(HWD_FILE, "rb"))  # English header words in MSBING.mdx
+EHWD = msgpack.load(open(EHWD_FILE, "rb"))  # English header words in MSBING.mdx
 
 # attempt to load userdict.txt if any
 try:

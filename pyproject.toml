@@ -32,6 +32,11 @@ blinker = "^1.4"
 sentence-splitter = "^1.4"
 xlrd = "^1.2.0"
 flake8 = "^3.8.3"
+diskcache = "^4.1.0"
+pyquery = "^1.4.1"
+PyStarDict = "^0.8"
+pyspellchecker = "^0.5.5"
+textblob-de = "^0.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
