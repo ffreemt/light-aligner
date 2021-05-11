@@ -37,6 +37,7 @@ pyquery = "^1.4.1"
 PyStarDict = "^0.8"
 pyspellchecker = "^0.5.5"
 textblob-de = "^0.4.3"
+spacy = "^2.3.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
