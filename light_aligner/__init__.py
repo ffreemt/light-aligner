@@ -2,6 +2,6 @@
 
 currently only en-zh based on msbing mdx
 """
-__date__ = "2020.8.12"
-__version__ = "0.1.1"
+# __date__ = "2020.8.12"
+__version__ = "0.1.2"
 VERSION = __version__.split(".")
